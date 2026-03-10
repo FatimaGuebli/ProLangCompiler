@@ -53,13 +53,13 @@ void yyerror(const char *s);
 %start S
 %%
 
+
+
 /* --- II.1. STRUCTURE GÉNÉRALE --- */
 
 S : BeginProject_mc idf point_virg SECTION_SETUP SECTION_RUN EndProject_mc point_virg
     { printf("Felicitations : La structure du programme ProLang est valide !\n"); }
   ;
-
-
 
 /* --- II.2. PARTIE DÉCLARATION (Setup) --- */
 
@@ -86,7 +86,7 @@ LISTE_IDFS_SUITE : barre_mc idf LISTE_IDFS_SUITE
 
 /* après ":" on décide si c'est tableau ou variable */
 SUITE_TYPE : TYPE OPT_INIT point_virg
-           | crochet_ouvrant TYPE point_virg cst_int crochet_fermant point_virg
+           | crochet_ouvrant TYPE point_virg ENTIER crochet_fermant point_virg
            ;
 
 /* initialisation optionnelle */
@@ -105,15 +105,10 @@ TYPE : int_mc
      | float_mc
      ;
 
-/* valeurs */
-
-VALEUR : cst_int
-       | cst_float
+/* valeurs modifiées pour utiliser les nombres signés/non-signés */
+VALEUR : ENTIER
+       | REEL
        ;
-
-
-
-
 
 /* --- SECTION RUN (Instructions) --- */
 
@@ -133,7 +128,7 @@ UNE_INSTRUCTION : INSTRUCTION_AFFECTATION
 
 /* 1. Affectation : Idf <- Expression ; ou Idf [5] <- Expression ; */
 INSTRUCTION_AFFECTATION : idf affectation EXPRESSION point_virg
-                        | idf crochet_ouvrant cst_int crochet_fermant affectation EXPRESSION point_virg
+                        | idf crochet_ouvrant ENTIER crochet_fermant affectation EXPRESSION point_virg
                         ;
 
 /* 2. Condition : if (condition) then { %% } else { %% } endIf ; */
@@ -164,7 +159,7 @@ LISTE_OUT : chaine
           | idf
           ;
 
-/* --- DÉFINITION DES EXPRESSIONS (Ce qui manquait !) --- */
+/* --- DÉFINITION DES EXPRESSIONS --- */
 
 EXPRESSION : EXPRESSION addition TERME
            | EXPRESSION sustra TERME
@@ -176,10 +171,11 @@ TERME : TERME multipl FACTEUR
       | FACTEUR
       ;
 
+/* Facteurs modifiés pour utiliser ENTIER et REEL */
 FACTEUR : idf
-        | cst_int
-        | cst_float
-        | idf crochet_ouvrant cst_int crochet_fermant  /* Pour lire Tab[i] */
+        | ENTIER
+        | REEL
+        | idf crochet_ouvrant ENTIER crochet_fermant  /* Pour lire Tab[i] */
         | parenthese_ouvrante EXPRESSION parenthese_fermante
         ;
 
@@ -198,6 +194,19 @@ OPERATEUR_COMP : supperieure
                | '!' '='  
                ;
 
+/* --- GESTION DES NOMBRES --- */
+
+ENTIER : cst_int
+       | parenthese_ouvrante SIGNE cst_int parenthese_fermante
+       ;
+
+REEL : cst_float
+     | parenthese_ouvrante SIGNE cst_float parenthese_fermante
+     ;
+
+SIGNE : addition
+      | sustra
+      ;
 
 
 %%

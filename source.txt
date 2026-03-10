@@ -22,7 +22,7 @@ Run :
     %% Test de la condition if-then-else
     if (b > 15) then {
         out("b est superieur a 15");
-        x <- x + 1;
+        x <- x + (-1);
     } else {
         out("b est petit");
     } endIf;
